@@ -9,6 +9,7 @@ import {
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import Checkbox from "expo-checkbox";
 const Login = () => {
   const router = useRouter();
   const handleLogin = () => {
@@ -17,10 +18,10 @@ const Login = () => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="px-10 ">
-        <View className=" gap-4 justify-center items-center h-full">
+        <View className=" gap-4  justify-center h-full">
           <Image
             source={require("../../assets/images/eventCampus-logo.png")}
-            className="w-250"
+            className="w-250 self-center"
             resizeMode="contain"
           />
           <View className="w-full">
@@ -37,6 +38,10 @@ const Login = () => {
               className=" border border-gray-400 py-2 px-4 rounded-lg"
             />
           </View>
+          <View className="flex-row  gap-2">
+            <Checkbox />
+            <Text>Beni hatirla</Text>
+          </View>
           <TouchableOpacity
             onPress={handleLogin}
             className="bg-purple-600 py-2 px-4 rounded-lg w-full"
@@ -45,9 +50,10 @@ const Login = () => {
               Giriş Yap
             </Text>
           </TouchableOpacity>
+
           <Pressable
             onPress={() => router.replace("/auth/signup")}
-            className="underline"
+            className="underline self-center"
           >
             <Text>Halen hesabin yok mu?</Text>
           </Pressable>
