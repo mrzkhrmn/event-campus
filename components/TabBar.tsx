@@ -40,8 +40,8 @@ const tabs = [
     icon: HomeTabIcon,
   },
   {
-    name: "/(campus)/settings" as const,
-    title: "Ayarlar",
+    name: "/(campus)/profile" as const,
+    title: "Profil",
     icon: HomeTabIcon,
   },
 ];

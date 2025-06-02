@@ -6,6 +6,8 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
+import MapView, { Marker } from "react-native-maps";
+import * as Linking from "expo-linking";
 import React, { useState } from "react";
 import { useLocalSearchParams, router } from "expo-router";
 import { formatToDayMonthYear } from "@/utils/formatDate";
@@ -13,6 +15,8 @@ import { formatToDayMonthYear } from "@/utils/formatDate";
 const EventDetail = () => {
   const { id } = useLocalSearchParams();
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [latitude, setLatitude] = useState(37.7749);
+  const [longitude, setLongitude] = useState(-122.4194);
 
   console.log(id);
 
@@ -23,6 +27,11 @@ const EventDetail = () => {
     .split(" ")
     .slice(0, 20)
     .join(" ");
+
+  const openInGoogleMaps = () => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    Linking.openURL(url);
+  };
 
   return (
     <View className="flex-1 bg-white px-4">
@@ -45,7 +54,7 @@ const EventDetail = () => {
               uri: "https://picsum.photos/200/300",
             }}
             resizeMode="cover"
-            className="w-full h-[20rem]"
+            className="w-full h-[20rem] rounded-lg"
           />
           <View className="border-b py-4 gap-1">
             <View className="flex-row items-center gap-2">
@@ -114,6 +123,31 @@ const EventDetail = () => {
               quos.
             </Text>
           </View>
+          <Text className="text-xl font-medium mt-4">Harita Konumu:</Text>
+          <Text className="text-lg font-medium mt-2">
+            Tiklayip haritalarda görebilirsiniz.
+          </Text>
+          <Pressable onPress={openInGoogleMaps} className="mt-2">
+            <MapView
+              style={{
+                width: "100%",
+                height: 200,
+                borderRadius: 10,
+              }}
+              initialRegion={{
+                latitude,
+                longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              pointerEvents="none" // haritaya tıklamayı devre dışı bırak
+            >
+              <Marker
+                coordinate={{ latitude, longitude }}
+                title="Etkinlik Konumu"
+              />
+            </MapView>
+          </Pressable>
           <TouchableOpacity className="bg-purple-500 py-2 px-4 rounded-full mt-4">
             <Text className="text-xl font-bold text-center text-white">
               Etkinliğe Katıl

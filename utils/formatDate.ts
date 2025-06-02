@@ -6,7 +6,7 @@ export const formatToDayMonth = (date: string) => {
   });
 };
 
-export const formatToDayMonthYear = (date: string) => {
+export const formatToDayMonthYear = (date: string | Date) => {
   const dateObj = new Date(date);
   return dateObj.toLocaleDateString("tr-TR", {
     day: "numeric",

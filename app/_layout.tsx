@@ -16,6 +16,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(campus)" />
           <Stack.Screen name="terms-conditions" />
+          <Stack.Screen name="(chat)" />
         </Stack>
       </GlobalLoading>
     </Provider>
