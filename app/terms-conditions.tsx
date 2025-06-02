@@ -20,7 +20,7 @@ const TermsAndConditions = () => {
       return;
     }
     dispatch(setIsTermsAndConditionsDone(true));
-    router.replace("/auth/login");
+    router.replace("/(auth)/login");
   };
   return (
     <SafeAreaView className="flex-1">

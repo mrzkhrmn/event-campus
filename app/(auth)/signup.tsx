@@ -37,7 +37,7 @@ const Signup = () => {
             />
           </View>
           <TouchableOpacity className="bg-purple-600 py-2 px-4 rounded-lg w-full">
-            <Text className="text-white text-center font-semibold">
+            <Text className="text-white text-center font-semibold text-lg">
               Kayıt Ol
             </Text>
           </TouchableOpacity>

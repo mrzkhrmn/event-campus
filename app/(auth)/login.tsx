@@ -6,14 +6,16 @@ import {
   Image,
   Pressable,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Checkbox from "expo-checkbox";
+
 const Login = () => {
+  const [isRememberMe, setIsRememberMe] = useState(false);
   const router = useRouter();
   const handleLogin = () => {
-    router.replace("/campus/home");
+    router.replace("/(campus)/home");
   };
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -28,7 +30,7 @@ const Login = () => {
             <Text className="text-base text-gray-600">Email</Text>
             <TextInput
               placeholder="Okul mailiniz..."
-              className=" border border-gray-400 py-2 px-4 rounded-lg"
+              className=" border border-gray-400 py-2 px-4 rounded-lg focus:border-black"
             />
           </View>
           <View className="w-full">
@@ -39,7 +41,11 @@ const Login = () => {
             />
           </View>
           <View className="flex-row  gap-2">
-            <Checkbox />
+            <Checkbox
+              value={isRememberMe}
+              onValueChange={setIsRememberMe}
+              color={isRememberMe ? "#9333ea" : "gray"}
+            />
             <Text>Beni hatirla</Text>
           </View>
           <TouchableOpacity
@@ -52,7 +58,7 @@ const Login = () => {
           </TouchableOpacity>
 
           <Pressable
-            onPress={() => router.replace("/auth/signup")}
+            onPress={() => router.replace("/(auth)/signup")}
             className="underline self-center"
           >
             <Text>Halen hesabin yok mu?</Text>

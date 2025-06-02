@@ -30,17 +30,17 @@ const TabIcon = ({
 
 const tabs = [
   {
-    name: "/campus/home" as const,
+    name: "/(campus)/home" as const,
     title: "Anasayfa",
     icon: HomeTabIcon,
   },
   {
-    name: "/campus/new-event" as const,
+    name: "/(campus)/new-event" as const,
     title: "Yeni Etkinlik",
     icon: HomeTabIcon,
   },
   {
-    name: "/campus/settings" as const,
+    name: "/(campus)/settings" as const,
     title: "Ayarlar",
     icon: HomeTabIcon,
   },
@@ -50,7 +50,7 @@ const TabBar = () => {
   const pathname = usePathname();
 
   return (
-    <View className="flex-row justify-around bg-purple-600 pb-4">
+    <View className="flex-row justify-around bg-purple-700 pb-4">
       {tabs.map((tab) => {
         const isActive = pathname === tab.name;
         const Icon = tab.icon;
@@ -58,7 +58,10 @@ const TabBar = () => {
         return (
           <TouchableOpacity
             key={tab.name}
-            onPress={() => router.push(tab.name as any)}
+            onPress={() => {
+              if (isActive) return;
+              router.push(tab.name as any);
+            }}
             className="flex-1"
           >
             <TabIcon
