@@ -8,11 +8,13 @@ const CustomTextInput = ({
   value,
   onChangeText,
   type = "text",
+  multiline = false,
 }: CustomTextInputProps) => {
   return (
     <View>
       <Text className="font-medium">{label}</Text>
       <TextInput
+        multiline={multiline}
         keyboardType={type === "numeric" ? "numeric" : "default"}
         placeholder={placeholder}
         value={value}

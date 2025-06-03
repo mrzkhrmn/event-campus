@@ -146,7 +146,7 @@ const CustomDateTimePicker = ({
                 textColor="#000000"
                 accentColor="#a855f7"
                 themeVariant="light"
-                minimumDate={getMinimumDate()}
+                {...(mode !== "time" && { minimumDate: getMinimumDate() })}
               />
             </View>
           </View>

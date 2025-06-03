@@ -4,6 +4,7 @@ export type CustomTextInputProps = {
   value: string;
   onChangeText: (text: string) => void;
   type?: "text" | "numeric";
+  multiline?: boolean;
 };
 
 export type CustomPickerProps = {
@@ -24,4 +25,23 @@ export type CustomDateTimePickerProps = {
   isModalVisible: boolean;
   setIsModalVisible: (visible: boolean) => void;
   label: string;
+};
+
+export type CustomCheckboxProps = {
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+  color: string;
+  label: string;
+};
+
+export type SelectLocationProps = {
+  selectedLocation: { latitude: number; longitude: number };
+  setSelectedLocation: (location: {
+    latitude: number;
+    longitude: number;
+  }) => void;
+  visible: boolean;
+  onClose: () => void;
+  address: string;
+  setAddress: (address: string) => void;
 };
