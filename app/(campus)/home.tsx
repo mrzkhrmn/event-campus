@@ -12,7 +12,9 @@ import Categoryitem from "@/components/Categoryitem";
 import { EventCardItemType } from "@/types/EventTypes";
 import EventItem from "@/components/EventItem";
 import SearchBar from "@/components/SearchBar";
+import { useAppSelector } from "@/hooks/hooks";
 const Home = () => {
+  const { userInfo, token } = useAppSelector((state: any) => state.user);
   const [selectedCategory, setSelectedCategory] = useState<string>("1");
   const categories = [
     {
@@ -233,6 +235,8 @@ const Home = () => {
       owner: "Mehmet Yılmaz",
     },
   ]);
+
+  console.log("userInfo", userInfo, "token", token);
 
   // Seçilen kategorinin homeText'ini performanslı şekilde hesapla
   const selectedCategoryText = useMemo(() => {
