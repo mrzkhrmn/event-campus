@@ -1,18 +1,38 @@
 export type EventCardItemType = {
-  id: string;
-  image: string;
-  categoryId: string;
+  id: number;
   name: string;
-  quota: number;
-  participants: number;
   description: string;
-  location: string;
-  date: string;
+  address: string;
+  startDate: string;
+  endDate: string;
   startTime: string;
   endTime: string;
   price: number;
   isFree: boolean;
-  owner: string;
+  maxParticipants: number;
+  currentParticipantCount: number;
+  latitude: number;
+  longitude: number;
+  isActive: boolean;
+  isEventEnded: boolean;
+  isEventStarted: boolean;
+  isPublic: boolean;
+  isRegistrationOpen: boolean;
+  isUserParticipant: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+  category: any; // Object tipinde geldiği için any olarak tanımladım
+  createdByUser: {
+    id: number;
+    email: string;
+    name: string;
+    surname: string;
+    universityName: string;
+    facultyName: string;
+    departmentName: string;
+  };
+  eventImages: any[]; // Array tipinde geldiği için any[] olarak tanımladım
+  university: any; // Object tipinde geldiği için any olarak tanımladım
 };
 
 export type EventDetailType = {

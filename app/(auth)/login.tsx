@@ -108,8 +108,8 @@ const Login = () => {
 
           <Formik
             initialValues={{
-              email: (userInfo as any)?.email || "",
-              password: (userInfo as any)?.password || "",
+              email: (userInfo as any)?.email || "mirza.kahraman@itu.edu.tr",
+              password: (userInfo as any)?.password || "Test123!",
             }}
             validationSchema={loginValidationSchema}
             onSubmit={handleSubmit}
@@ -167,13 +167,16 @@ const Login = () => {
                   )}
                 </View>
 
-                <View className="flex-row  gap-2">
-                  <Checkbox
-                    value={rememberMe}
-                    onValueChange={() => dispatch(setRememberMe(!rememberMe))}
-                    color={rememberMe ? "#9333ea" : "gray"}
-                  />
-                  <Text>Beni hatırla</Text>
+                <View className="w-full justify-between flex-row">
+                  <View className="flex-row  gap-2">
+                    <Checkbox
+                      value={rememberMe}
+                      onValueChange={() => dispatch(setRememberMe(!rememberMe))}
+                      color={rememberMe ? "#9333ea" : "gray"}
+                    />
+                    <Text>Beni hatırla</Text>
+                  </View>
+                  <Text className="underline">Şifrenizi mi unuttunuz?</Text>
                 </View>
 
                 <TouchableOpacity
@@ -189,7 +192,7 @@ const Login = () => {
           </Formik>
 
           <Pressable onPress={() => router.replace("/(auth)/signup")}>
-            <Text className="underline self-center">Halen hesabın yok mu?</Text>
+            <Text className="underline self-center">Hayla hesabın yok mu?</Text>
           </Pressable>
         </View>
       </View>

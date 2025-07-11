@@ -1,5 +1,5 @@
 export type CategoryItemType = {
-  id: string;
+  id: number;
   name: string;
   icon: string;
   isSelected: boolean;

@@ -14,27 +14,30 @@ const CustomPicker = ({
   const [tempSelectedValue, setTempSelectedValue] = useState(selectedValue);
 
   const handleCancel = () => {
-    setTempSelectedValue(selectedValue); // Orijinal değere geri döndür
+    setTempSelectedValue(selectedValue);
     setIsModalVisible(false);
   };
 
   const handleConfirm = () => {
-    setSelectedValue(tempSelectedValue); // Seçili değeri kaydet
+    setSelectedValue(tempSelectedValue);
     setIsModalVisible(false);
   };
 
-  // Seçili kategorinin text'ini bul
   const getSelectedText = () => {
     const selectedItem = itemData.find((item) => item.value === selectedValue);
-    return selectedItem ? selectedItem.text : "Kategori Seç";
+    return selectedItem ? (
+      <Text className="text-black">{selectedItem.text}</Text>
+    ) : (
+      <Text className="text-gray-400">Seçiniz</Text>
+    );
   };
 
   return (
     <>
       <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-        <Text className="font-medium">{label}</Text>
+        {label && <Text className="font-medium">{label}</Text>}
         <View className="border border-purple-300 rounded-md p-3">
-          <Text className="text-gray-700">{getSelectedText()}</Text>
+          {getSelectedText()}
         </View>
       </TouchableOpacity>
 

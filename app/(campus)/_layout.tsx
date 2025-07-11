@@ -5,7 +5,7 @@ import TabBar from "@/components/TabBar";
 import CampusHeader from "@/components/CampusHeader";
 const CampusLayout = () => {
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 ">
       <SafeAreaView className="flex-1 bg-purple-700">
         <CampusHeader />
         <Stack screenOptions={{ headerShown: false }}>

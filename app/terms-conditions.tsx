@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import Checkbox from "expo-checkbox";
@@ -23,7 +24,10 @@ const TermsAndConditions = () => {
     router.replace("/(auth)/login");
   };
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaView
+      className="flex-1"
+      style={{ paddingVertical: Platform.OS === "android" ? 30 : 0 }}
+    >
       <View className=" w-full flex-1 items-center justify-center bg-gray-200">
         <Text>Buraya gorsel gelecek</Text>
       </View>

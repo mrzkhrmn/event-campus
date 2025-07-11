@@ -7,7 +7,7 @@ const CampusHeader = () => {
   return (
     <View className="bg-purple-700">
       <View className="flex-row items-center justify-between px-4 py-4">
-        <Text className="w-1/3 text-start text-lg leading-5 text-white font-medium">{`Hosgeldin\n${userInfo?.name}`}</Text>
+        <Text className="w-1/3 text-start text-lg leading-5 text-white font-medium">{`Hosgeldin\n${userInfo?.name} ${userInfo?.surname}`}</Text>
         <Text className="text-white text-2xl font-bold text-center w-1/3">
           LOGO
         </Text>

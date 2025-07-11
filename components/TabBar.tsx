@@ -51,7 +51,6 @@ const tabs = [
 
 const TabBar = () => {
   const pathname = usePathname();
-  console.log("pathname", pathname);
 
   return (
     <View className="flex-row justify-around bg-purple-700 pb-4">
