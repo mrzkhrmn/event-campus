@@ -13,10 +13,14 @@ export const authApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: "/Auth/Register",
         method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         body: data,
       }),
     }),
   }),
+  overrideExisting: true,
 });
 
 export const { useLoginMutation, useRegisterMutation } = authApi;
