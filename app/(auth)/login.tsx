@@ -53,8 +53,8 @@ const Login = () => {
 
       dispatch(
         loginSuccess({
-          token: response.data.token,
-          user: response.data.userInfo,
+          token: response.data.data.token,
+          user: response.data.data.student,
         })
       );
       router.replace("/(campus)/home");
@@ -108,8 +108,8 @@ const Login = () => {
 
           <Formik
             initialValues={{
-              email: (userInfo as any)?.email || "mirza.kahraman@itu.edu.tr",
-              password: (userInfo as any)?.password || "Test123!",
+              email: (userInfo as any)?.email || "nuran@email.com",
+              password: (userInfo as any)?.password || "1234567",
             }}
             validationSchema={loginValidationSchema}
             onSubmit={handleSubmit}

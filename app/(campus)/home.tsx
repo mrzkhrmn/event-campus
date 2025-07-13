@@ -40,7 +40,7 @@ const Home = () => {
     return [tumuCategory, ...categoriesData.data];
   }, [categoriesData]);
 
-  //console.log("userInfo", userInfo, "token", token);
+  console.log("userInfo", userInfo, "token", token);
 
   const selectedCategoryText = useMemo(() => {
     const selectedCat = allCategories.find(

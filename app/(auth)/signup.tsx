@@ -86,8 +86,8 @@ const Signup = () => {
       if (response.data.isSuccess) {
         dispatch(
           loginSuccess({
-            token: response.data.token,
-            user: response.data.student,
+            token: response.data.data.token,
+            user: response.data.data.student,
           })
         );
         router.replace("/(campus)/home");
