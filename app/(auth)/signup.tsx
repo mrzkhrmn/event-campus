@@ -50,48 +50,21 @@ const Signup = () => {
         Surname: values.surname,
         Email: values.email,
         Password: values.password,
+        Birthday: new Date(),
         UniversityId: values.university,
         FacultyId: values.faculty,
+        ProfileImageUrl: "",
       });
 
-      console.log("response", response);
-      if (response.error) {
-        // Backend'den gelen hata mesajlarını işle
-        const error = response.error as any;
-
-        if (error.data && error.data.errors) {
-          const errors = error.data.errors;
-          let errorMessages: string[] = [];
-
-          // Tüm field'lardaki hata mesajlarını topla
-          Object.keys(errors).forEach((field) => {
-            const fieldErrors = errors[field];
-            if (Array.isArray(fieldErrors)) {
-              errorMessages = errorMessages.concat(fieldErrors);
-            }
-          });
-
-          // Hata mesajlarını alert ile göster
-          Alert.alert("Kayıt Hatası", errorMessages.join("\n\n"), [
-            { text: "Tamam", style: "default" },
-          ]);
-        } else {
-          // Genel hata mesajı
-          Alert.alert(
-            "Hata",
-            "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.",
-            [{ text: "Tamam", style: "default" }]
-          );
-        }
-        return;
+      if (response.data.IsSuccess) {
+        dispatch(
+          loginSuccess({
+            token: response.data.token,
+            user: response.data.student,
+          })
+        );
+        router.replace("/(campus)/home");
       }
-      dispatch(
-        loginSuccess({
-          token: response.data.token,
-          user: response.data.userInfo,
-        })
-      );
-      router.replace("/(campus)/home");
     } catch (error) {
       console.log(error);
       Alert.alert(
