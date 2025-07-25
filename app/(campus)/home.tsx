@@ -14,7 +14,7 @@ import EventItem from "@/components/EventItem";
 import SearchBar from "@/components/SearchBar";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { useGetCategoriesQuery } from "@/redux/api/cateogory/categoryApi";
-import { useGetEventsQuery } from "@/redux/api/event/eventApi";
+import { useGetAllEventsQuery } from "@/redux/api/event/eventApi";
 import { setIsLoading } from "@/redux/slices/globalSlice";
 
 const Home = () => {
@@ -59,8 +59,11 @@ const Home = () => {
     setSelectedCategory(id);
   };
 
-  const { data: eventsData, isLoading: isEventsLoading } = useGetEventsQuery(
-    selectedCategory === 0 ? undefined : selectedCategory,
+  const { data: eventsData, isLoading: isEventsLoading } = useGetAllEventsQuery(
+    {
+      categoryId: selectedCategory === 0 ? undefined : selectedCategory,
+      universityId: userInfo?.universityId,
+    },
     {
       refetchOnMountOrArgChange: true,
     }

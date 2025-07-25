@@ -10,14 +10,15 @@ export const eventApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Events"],
     }),
-    getEvents: builder.query({
-      query: (categoryId) => ({
-        url: "/Event/",
+    getAllEvents: builder.query({
+      query: ({ categoryId, universityId }) => ({
+        url: "/Event/GetAllEvents",
         method: "GET",
         params: {
           page: 1,
           pageSize: 10,
-          categoryId: categoryId,
+          categoryId,
+          universityId,
         },
       }),
       providesTags: ["Events"],
@@ -56,7 +57,7 @@ export const eventApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useGetEventsQuery,
+  useGetAllEventsQuery,
   useGetEventByIdQuery,
   useGetParticipatedEventsQuery,
   useJoinEventMutation,
