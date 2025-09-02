@@ -12,11 +12,14 @@ export const eventApi = baseApi.injectEndpoints({
       invalidatesTags: ["Events"],
     }),
     getAllEvents: builder.query({
-      query: (categoryId) => ({
+      query: ({ categoryId, universityId }) => ({
         url: "/Event/GetAllEvents",
         method: "GET",
         params: {
-          categoryId: categoryId,
+          page: 1,
+          pageSize: 10,
+          categoryId,
+          universityId,
         },
       }),
       providesTags: ["Events"],

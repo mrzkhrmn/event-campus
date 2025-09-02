@@ -59,7 +59,10 @@ const Home = () => {
   };
 
   const { data: eventsData, isLoading: isEventsLoading } = useGetAllEventsQuery(
-    selectedCategory === 0 ? undefined : selectedCategory,
+    {
+      categoryId: selectedCategory === 0 ? undefined : selectedCategory,
+      universityId: userInfo?.universityId,
+    },
     {
       refetchOnMountOrArgChange: true,
     }
