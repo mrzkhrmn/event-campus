@@ -61,39 +61,30 @@ const Signup = () => {
       formDataToSend.append("UniversityId", values.university);
       formDataToSend.append("FacultyId", values.faculty);
       formDataToSend.append("DepartmentId", values.department);
+      formDataToSend.append("ProfileImage", {
+        uri: selectedImage.uri,
+        name: `profile-image.jpg`,
+        type: "image/jpeg",
+      } as any);
 
-      if (selectedImage) {
-        const imageFile = {
-          uri: selectedImage.uri,
-          type: selectedImage.mimeType || "image/jpeg",
-          name: "profile-image.jpg",
-        };
-        formDataToSend.append("profileImage", imageFile as any);
-      }
-
-      const response = await register(formDataToSend);
+      const response = await register(formDataToSend).unwrap();
 
       console.log("response", response);
 
-      if (response.error) {
-        const errorMessage =
-          (response.error as any).data?.message ||
-          "Kayıt sırasında bir hata oluştu";
-        Alert.alert("Hata", errorMessage);
+      if (!response.isSuccess || response.data) {
+        Alert.alert("Hata", response.errors[0].message);
         return;
       }
 
-      if (response.data.isSuccess) {
-        dispatch(
-          loginSuccess({
-            token: response.data.data.token,
-            user: response.data.data.student,
-          })
-        );
-        router.replace("/(campus)/home");
-      }
+      dispatch(
+        loginSuccess({
+          token: response.data.data.token,
+          user: response.data.data.student,
+        })
+      );
+      router.replace("/(campus)/home");
     } catch (error) {
-      console.log(error);
+      console.log("signup error", error);
       Alert.alert(
         "Hata",
         "Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin."
@@ -140,6 +131,8 @@ const Signup = () => {
       setSelectedImage(result.assets[0]);
     }
   };
+
+  console.log("universities", universities);
 
   return (
     <SafeAreaView className="flex-1">

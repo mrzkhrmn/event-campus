@@ -7,10 +7,10 @@ export type EventCardItemType = {
   endDate: string;
   startTime: string;
   endTime: string;
-  price: number;
+  eventPrice: number;
   isFree: boolean;
   maxParticipants: number;
-  currentParticipantCount: number;
+  currentParticipants: number;
   latitude: number;
   longitude: number;
   isActive: boolean;
@@ -21,8 +21,11 @@ export type EventCardItemType = {
   isUserParticipant: boolean;
   createdAt: string;
   updatedAt: string | null;
-  category: any; // Object tipinde geldiği için any olarak tanımladım
-  createdByUser: {
+  category: {
+    id: number;
+    name: string;
+  };
+  eventOwner: {
     id: number;
     email: string;
     name: string;
@@ -30,9 +33,13 @@ export type EventCardItemType = {
     universityName: string;
     facultyName: string;
     departmentName: string;
+    profileImage: string;
   };
-  eventImages: any[]; // Array tipinde geldiği için any[] olarak tanımladım
-  university: any; // Object tipinde geldiği için any olarak tanımladım
+  eventImages: string[];
+  university: {
+    id: number;
+    name: string;
+  };
 };
 
 export type EventDetailType = {

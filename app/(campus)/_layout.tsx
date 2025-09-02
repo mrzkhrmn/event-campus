@@ -12,6 +12,7 @@ const CampusLayout = () => {
           <Stack.Screen name="home" />
           <Stack.Screen name="new-event" />
           <Stack.Screen name="profile" />
+          <Stack.Screen name="student/[id]" />
           <Stack.Screen name="[id]" />
         </Stack>
       </SafeAreaView>

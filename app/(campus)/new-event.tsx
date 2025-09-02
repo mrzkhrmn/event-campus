@@ -16,13 +16,28 @@ import CustomPicker from "@/components/CustomPicker";
 import CustomDateTimePicker from "@/components/CustomDateTimePicker";
 import CustomCheckbox from "@/components/CustomCheckbox";
 import SelectLocationScreen from "@/components/SelectLocationScreen";
-import { useCreateEventMutation } from "@/redux/api/event/eventApi";
+import { useAddEventMutation } from "@/redux/api/event/eventApi";
 import { useDispatch } from "react-redux";
 import { setIsLoading } from "@/redux/slices/globalSlice";
 import { useGetCategoriesQuery } from "@/redux/api/cateogory/categoryApi";
 import PhotoSelectionModal from "@/components/PhotoSelectionModal";
+import { useAppSelector } from "@/hooks/hooks";
+import { RootState } from "@/redux/store";
 const NewEvent = () => {
+  const { userInfo } = useAppSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+
+  const [eventName, setEventName] = useState<string>("");
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [maxParticipants, setMaxParticipants] = useState<string>("1");
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [endDate, setEndDate] = useState<Date>(new Date());
+  const [openAddress, setOpenAddress] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [isFree, setIsFree] = useState<boolean>(true);
+  const [eventPrice, setEventPrice] = useState<string>("0");
+  const [eventImages, setEventImages] = useState<string[]>([]);
 
   const [selectedLocation, setSelectedLocation] = useState<{
     latitude: number;
@@ -31,8 +46,6 @@ const NewEvent = () => {
     latitude: 0,
     longitude: 0,
   });
-
-  const [address, setAddress] = useState<string>("");
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
@@ -45,84 +58,74 @@ const NewEvent = () => {
 
   const { data: categories } = useGetCategoriesQuery();
 
-  const [eventData, setEventData] = useState({
-    name: "",
-    categoryId: "",
-    MaxParticipants: "",
-    startDate: new Date(),
-    endDate: new Date(),
-    startTime: new Date(),
-    endTime: new Date(),
-    isFree: true,
-    isPublic: true,
-    price: 0,
-    address: "",
-    description: "",
-    latitude: selectedLocation.latitude,
-    longitude: selectedLocation.longitude,
-    images: [] as string[],
-  });
+  const [addEvent] = useAddEventMutation();
 
-  const [createEvent] = useCreateEventMutation();
+  console.log("eventImages", eventImages);
 
   const handleCreateEvent = async () => {
     dispatch(setIsLoading(true));
-    console.log(JSON.stringify(eventData, null, 2));
     try {
-      const response = await createEvent(eventData).unwrap();
-      if (!response.IsSuccess) {
+      const formData = new FormData();
+      formData.append("name", eventName);
+      formData.append("categoryId", categoryId);
+      formData.append("maxParticipants", maxParticipants);
+      formData.append("startDate", startDate.toISOString());
+      formData.append("endDate", endDate.toISOString());
+      formData.append("mapLatitude", selectedLocation.latitude.toString());
+      formData.append("mapLongitude", selectedLocation.longitude.toString());
+      formData.append("openAddress", openAddress);
+      formData.append("description", description);
+      formData.append("isFree", isFree.toString());
+      formData.append("eventPrice", eventPrice);
+      eventImages.forEach((image, index) => {
+        formData.append("EventImages", {
+          uri: image,
+          name: `image_${index}.jpg`,
+          type: "image/jpeg",
+        } as any);
+      });
+      formData.append("eventOwnerId", userInfo?.id);
+      formData.append("city", "istanbul");
+      formData.append("county", "istanbul");
+      const response = await addEvent(formData).unwrap();
+      console.log("etkinlik olsuturma respoinse", response);
+      if (!response.isSuccess) {
         return Alert.alert("Hata", "Etkinlik oluşturulamadı");
       }
+
       Alert.alert("Başarılı", "Etkinlik oluşturuldu");
       handleResetData();
     } catch (error: any) {
-      console.log(error.data.errors);
+      console.log("error", error);
+      Alert.alert("Hata", error.data.errors[0]);
     } finally {
       dispatch(setIsLoading(false));
     }
   };
 
   const handleResetData = () => {
-    setEventData({
-      name: "",
-      categoryId: "",
-      MaxParticipants: "",
-      startDate: new Date(),
-      endDate: new Date(),
-      startTime: new Date(),
-      endTime: new Date(),
-      isFree: true,
-      isPublic: true,
-      price: 0,
-      images: [] as string[],
-      address: "",
-      description: "",
-      latitude: selectedLocation.latitude,
-      longitude: selectedLocation.longitude,
+    setEventName("");
+    setCategoryId("");
+    setMaxParticipants("1");
+    setStartDate(new Date());
+    setEndDate(new Date());
+    setOpenAddress("");
+    setDescription("");
+    setSelectedLocation({
+      latitude: 0,
+      longitude: 0,
     });
+    setEventImages([]);
   };
 
   const handleImageSelected = (imageUri: string) => {
-    setEventData((prevData) => ({
-      ...prevData,
-      images: [...prevData.images, imageUri],
-    }));
+    setEventImages([...eventImages, imageUri]);
   };
 
   const handleRemoveImage = (index: number) => {
-    setEventData((prevData) => ({
-      ...prevData,
-      images: prevData.images.filter((_, i) => i !== index),
-    }));
+    setEventImages(eventImages.filter((_, i) => i !== index));
   };
 
-  useEffect(() => {
-    setEventData((prevData) => ({
-      ...prevData,
-      latitude: selectedLocation.latitude,
-      longitude: selectedLocation.longitude,
-    }));
-  }, [selectedLocation]);
   return (
     <>
       <ScrollView>
@@ -134,19 +137,15 @@ const NewEvent = () => {
               </Text>
               <View className="gap-4">
                 <CustomTextInput
+                  value={eventName}
                   label="Etkinlik Adı"
                   placeholder="Etkinlik Adını Giriniz"
-                  value={eventData.name}
-                  onChangeText={(text) =>
-                    setEventData({ ...eventData, name: text })
-                  }
+                  onChangeText={(text) => setEventName(text)}
                 />
                 <CustomPicker
-                  selectedValue={eventData.categoryId}
-                  setSelectedValue={(value) =>
-                    setEventData({ ...eventData, categoryId: value })
-                  }
-                  itemData={categories?.data.map(
+                  selectedValue={categoryId}
+                  setSelectedValue={(value) => setCategoryId(value)}
+                  itemData={categories?.data?.map(
                     (category: { id: string; name: string }) => ({
                       text: category.name,
                       value: category.id,
@@ -160,47 +159,59 @@ const NewEvent = () => {
                   type="numeric"
                   label="Kontenjan"
                   placeholder="Maksimum Katılımcı Sayısı"
-                  value={eventData.MaxParticipants}
-                  onChangeText={(text) =>
-                    setEventData({ ...eventData, MaxParticipants: text })
-                  }
+                  value={maxParticipants}
+                  onChangeText={(text) => setMaxParticipants(text)}
                 />
                 <CustomDateTimePicker
                   mode="date"
-                  value={eventData.startDate}
-                  onChange={(date) =>
-                    setEventData({ ...eventData, startDate: date })
-                  }
+                  value={startDate}
+                  onChange={(date) => {
+                    const updatedStartDate = new Date(startDate);
+                    updatedStartDate.setFullYear(date.getFullYear());
+                    updatedStartDate.setMonth(date.getMonth());
+                    updatedStartDate.setDate(date.getDate());
+                    setStartDate(updatedStartDate);
+                  }}
                   isModalVisible={showStartDatePicker}
                   setIsModalVisible={setShowStartDatePicker}
                   label="Başlangıç Tarihi"
                 />
                 <CustomDateTimePicker
                   mode="date"
-                  value={eventData.endDate}
-                  onChange={(date) =>
-                    setEventData({ ...eventData, endDate: date })
-                  }
+                  value={endDate}
+                  onChange={(date) => {
+                    const updatedEndDate = new Date(endDate);
+                    updatedEndDate.setFullYear(date.getFullYear());
+                    updatedEndDate.setMonth(date.getMonth());
+                    updatedEndDate.setDate(date.getDate());
+                    setEndDate(updatedEndDate);
+                  }}
                   isModalVisible={showEndDatePicker}
                   setIsModalVisible={setShowEndDatePicker}
                   label="Bitiş Tarihi"
                 />
                 <CustomDateTimePicker
                   mode="time"
-                  value={eventData.startTime}
-                  onChange={(date) =>
-                    setEventData({ ...eventData, startTime: date })
-                  }
+                  value={startDate}
+                  onChange={(date) => {
+                    const updatedStartDate = new Date(startDate);
+                    updatedStartDate.setHours(date.getHours());
+                    updatedStartDate.setMinutes(date.getMinutes());
+                    setStartDate(updatedStartDate);
+                  }}
                   isModalVisible={showStartTimePicker}
                   setIsModalVisible={setShowStartTimePicker}
                   label="Başlangıç Saati"
                 />
                 <CustomDateTimePicker
                   mode="time"
-                  value={eventData.endTime}
-                  onChange={(date) =>
-                    setEventData({ ...eventData, endTime: date })
-                  }
+                  value={endDate}
+                  onChange={(date) => {
+                    const updatedEndDate = new Date(endDate);
+                    updatedEndDate.setHours(date.getHours());
+                    updatedEndDate.setMinutes(date.getMinutes());
+                    setEndDate(updatedEndDate);
+                  }}
                   isModalVisible={showEndTimePicker}
                   setIsModalVisible={setShowEndTimePicker}
                   label="Bitiş Saati"
@@ -220,68 +231,40 @@ const NewEvent = () => {
                   type="text"
                   label="Açık Adres"
                   placeholder="Açık Adres"
-                  value={eventData.address}
-                  onChangeText={(text) =>
-                    setEventData({ ...eventData, address: text })
-                  }
+                  value={openAddress}
+                  onChangeText={(text) => setOpenAddress(text)}
                   multiline={true}
                 />
                 <View className="flex-row gap-4 mt-2">
                   <CustomCheckbox
-                    value={eventData.isFree === true}
-                    onValueChange={() =>
-                      setEventData({ ...eventData, isFree: true })
-                    }
+                    value={isFree === true}
+                    onValueChange={() => setIsFree(true)}
                     color={"purple"}
                     label={"Ücretsiz Etkinlik"}
                   />
                   <CustomCheckbox
-                    value={eventData.isFree === false}
-                    onValueChange={() =>
-                      setEventData({ ...eventData, isFree: false })
-                    }
+                    value={isFree === false}
+                    onValueChange={() => setIsFree(false)}
                     color={"purple"}
                     label={"Ücretli Etkinlik"}
                   />
                 </View>
-                {!eventData.isFree && (
+                {!isFree && (
                   <CustomTextInput
                     type="numeric"
                     label="Ücret"
                     placeholder="Ödenecek Ücreti Giriniz"
-                    value={eventData.price.toString()}
-                    onChangeText={(text) =>
-                      setEventData({ ...eventData, price: Number(text) })
-                    }
+                    value={eventPrice}
+                    onChangeText={(text) => setEventPrice(text)}
                   />
                 )}
-                <View className="flex-row gap-4 mt-2">
-                  <CustomCheckbox
-                    value={eventData.isPublic === true}
-                    onValueChange={() =>
-                      setEventData({ ...eventData, isPublic: true })
-                    }
-                    color={"purple"}
-                    label={"Açık Alan"}
-                  />
-                  <CustomCheckbox
-                    value={eventData.isPublic === false}
-                    onValueChange={() =>
-                      setEventData({ ...eventData, isPublic: false })
-                    }
-                    color={"purple"}
-                    label={"Kapalı Alan"}
-                  />
-                </View>
 
                 <CustomTextInput
                   type="text"
                   label="Açıklama / Kural"
                   placeholder="Açıklama, kurallar, notlar vs.."
-                  value={eventData.description}
-                  onChangeText={(text) =>
-                    setEventData({ ...eventData, description: text })
-                  }
+                  value={description}
+                  onChangeText={(text) => setDescription(text)}
                   multiline={true}
                 />
                 <SelectLocationScreen
@@ -304,11 +287,11 @@ const NewEvent = () => {
                   </Text>
                 </View>
               </Pressable>
-              {eventData.images.length > 0 && (
+              {eventImages.length > 0 && (
                 <FlatList
                   horizontal
                   contentContainerStyle={{ gap: 14 }}
-                  data={eventData.images}
+                  data={eventImages}
                   renderItem={({ item, index }) => (
                     <View key={index} className="relative flex-row gap-2 mt-4">
                       <Image

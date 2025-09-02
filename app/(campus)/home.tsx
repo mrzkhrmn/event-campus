@@ -14,7 +14,7 @@ import EventItem from "@/components/EventItem";
 import SearchBar from "@/components/SearchBar";
 import { useAppSelector, useAppDispatch } from "@/hooks/hooks";
 import { useGetCategoriesQuery } from "@/redux/api/cateogory/categoryApi";
-import { useGetEventsQuery } from "@/redux/api/event/eventApi";
+import { useGetAllEventsQuery } from "@/redux/api/event/eventApi";
 import { setIsLoading } from "@/redux/slices/globalSlice";
 
 const Home = () => {
@@ -26,6 +26,7 @@ const Home = () => {
     refetchOnMountOrArgChange: true,
   });
 
+  console.log("id", userInfo.id);
   const allCategories = useMemo(() => {
     const tumuCategory = {
       id: 0,
@@ -39,8 +40,6 @@ const Home = () => {
 
     return [tumuCategory, ...categoriesData.data];
   }, [categoriesData]);
-
-  console.log("userInfo", userInfo, "token", token);
 
   const selectedCategoryText = useMemo(() => {
     const selectedCat = allCategories.find(
@@ -59,12 +58,13 @@ const Home = () => {
     setSelectedCategory(id);
   };
 
-  const { data: eventsData, isLoading: isEventsLoading } = useGetEventsQuery(
+  const { data: eventsData, isLoading: isEventsLoading } = useGetAllEventsQuery(
     selectedCategory === 0 ? undefined : selectedCategory,
     {
       refetchOnMountOrArgChange: true,
     }
   );
+
   useEffect(() => {
     dispatch(setIsLoading(isEventsLoading));
   }, [isEventsLoading]);
@@ -80,8 +80,9 @@ const Home = () => {
           data={allCategories}
           renderItem={({ item }) => (
             <Categoryitem
-              item={{ ...item, isSelected: selectedCategory === item.id }}
+              item={item}
               handlePressCategory={() => handlePressCategory(item.id)}
+              selectedCategoryId={selectedCategory}
             />
           )}
           horizontal

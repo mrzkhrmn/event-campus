@@ -2,29 +2,28 @@ import { baseApi } from "../baseApi";
 
 export const eventApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    createEvent: builder.mutation({
+    addEvent: builder.mutation({
       query: (data) => ({
-        url: "/Event/",
+        url: "/Event/AddEvent",
         method: "POST",
         body: data,
       }),
+
       invalidatesTags: ["Events"],
     }),
-    getEvents: builder.query({
+    getAllEvents: builder.query({
       query: (categoryId) => ({
-        url: "/Event/",
+        url: "/Event/GetAllEvents",
         method: "GET",
         params: {
-          page: 1,
-          pageSize: 10,
           categoryId: categoryId,
         },
       }),
       providesTags: ["Events"],
     }),
-    getEventById: builder.query({
+    getEventDetail: builder.query({
       query: (eventId) => ({
-        url: `/Event/GetEventById/${eventId}`,
+        url: `/Event/GetEventDetail/${eventId}`,
         method: "GET",
       }),
       providesTags: ["Events"],
@@ -37,17 +36,19 @@ export const eventApi = baseApi.injectEndpoints({
       providesTags: ["Events"],
     }),
     joinEvent: builder.mutation({
-      query: (eventId) => ({
-        url: `/Event/${eventId}/join`,
+      query: ({ eventId, studentId }) => ({
+        url: `/Event/JoinEvent`,
         method: "POST",
+        body: { studentId: studentId, eventId: eventId },
       }),
       invalidatesTags: ["Events"],
     }),
 
     leaveEvent: builder.mutation({
-      query: (eventId) => ({
-        url: `/Event/${eventId}/leave`,
+      query: ({ eventId, studentId }) => ({
+        url: `/Event/LeaveEvent`,
         method: "POST",
+        body: { studentId: studentId, eventId: eventId },
       }),
       invalidatesTags: ["Events"],
     }),
@@ -56,10 +57,10 @@ export const eventApi = baseApi.injectEndpoints({
 });
 
 export const {
-  useGetEventsQuery,
-  useGetEventByIdQuery,
+  useGetAllEventsQuery,
+  useGetEventDetailQuery,
   useGetParticipatedEventsQuery,
   useJoinEventMutation,
   useLeaveEventMutation,
-  useCreateEventMutation,
+  useAddEventMutation,
 } = eventApi;

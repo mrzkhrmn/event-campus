@@ -14,3 +14,11 @@ export const formatToDayMonthYear = (date: string | Date) => {
     year: "numeric",
   });
 };
+
+export const formatToClock = (date: string | Date) => {
+  const dateObj = new Date(date);
+  return dateObj.toLocaleTimeString("tr-TR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};

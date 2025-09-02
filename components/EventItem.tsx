@@ -1,35 +1,51 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, Pressable } from "react-native";
 import React from "react";
 import { EventCardItemType } from "@/types/EventTypes";
-import { formatToDayMonth } from "@/utils/formatDate";
+import {
+  formatToClock,
+  formatToDayMonth,
+  formatToDayMonthYear,
+} from "@/utils/formatDate";
 import { router } from "expo-router";
-import { formatTime } from "@/utils/formatTime";
+import { WP } from "@/utils/dimensionsWidth";
 const EventItem = ({ item }: { item: EventCardItemType }) => {
-  const eventOwner = item.createdByUser.name + " " + item.createdByUser.surname;
+  console.log(item);
   return (
     <View className="gap-2 bg-white p-4">
       <View className="flex-row items-center gap-2">
-        <View className="bg-gray-300 p-2 w-12 h-12 rounded-full items-center justify-center relative">
+        <Pressable
+          className=" w-12 h-12 overflow-hidden rounded-full items-center justify-center relative"
+          onPress={() => {
+            router.push(`/student/${item.eventOwner.id}`);
+          }}
+        >
           <Image
-            source={require("@/assets/images/default-user.png")}
-            resizeMode="contain"
-            className="w-full h-full"
+            source={{ uri: item.eventOwner.profileImage }}
+            resizeMode="cover"
+            className="w-full h-full object-center"
           />
-        </View>
-        <View className="">
-          <Text className="font-semibold leading-4">{eventOwner}</Text>
-          <Text className="text-sm text-gray-500 leading-4">
-            {item.createdByUser.facultyName}
-          </Text>
+        </Pressable>
+        <View className="flex-row flex-1 justify-between">
+          <View>
+            <Text className="font-semibold leading-4">
+              {item.eventOwner.name} {item.eventOwner.surname}
+            </Text>
+            <Text className="text-sm text-gray-500 leading-4">
+              {item.eventOwner.departmentName}
+            </Text>
+            <Text className="text-sm text-gray-500 leading-4 ">
+              {item.eventOwner.facultyName}
+            </Text>
+          </View>
           <Text className="text-sm text-gray-500 leading-4 ">
-            {item.createdByUser.departmentName}
+            {formatToDayMonthYear(item.createdAt)}
           </Text>
         </View>
       </View>
       <View className="border border-gray-300 rounded-xl overflow-hidden">
         <Image
           source={{ uri: item.eventImages[0] }}
-          className="w-full h-48 "
+          className="w-full h-48 z-10"
           resizeMode="cover"
         />
         <View className="bg-purple-500">
@@ -37,12 +53,19 @@ const EventItem = ({ item }: { item: EventCardItemType }) => {
             <View className="gap-2">
               <View className="flex-row gap-1">
                 <Text className="text-white font-bold">Etkinlik Adı:</Text>
-                <Text className="text-white font-medium">{item.name}</Text>
+                <Text
+                  className="text-white font-medium whitespace-nowrap overflow-hidden text-ellipsis"
+                  numberOfLines={1}
+                  style={{ width: WP(32) }}
+                  ellipsizeMode="tail"
+                >
+                  {item.name}
+                </Text>
               </View>
               <View className="flex-row gap-1">
                 <Text className="text-white font-bold">Katılımcı Sayısı:</Text>
                 <Text className="text-white font-medium">
-                  {item.currentParticipantCount}/{item.maxParticipants}
+                  {item.currentParticipants}/{item.maxParticipants}
                 </Text>
               </View>
               {item.isFree ? (
@@ -50,7 +73,9 @@ const EventItem = ({ item }: { item: EventCardItemType }) => {
               ) : (
                 <View className="flex-row gap-1">
                   <Text className="text-white font-bold">Ücret:</Text>
-                  <Text className="text-white font-medium">{item.price} ₺</Text>
+                  <Text className="text-white font-medium">
+                    {item.eventPrice} ₺
+                  </Text>
                 </View>
               )}
             </View>
@@ -59,7 +84,8 @@ const EventItem = ({ item }: { item: EventCardItemType }) => {
                 📅 {formatToDayMonth(item.startDate)}
               </Text>
               <Text className="text-white font-bold">
-                🕒 {formatTime(item.startTime)} - {formatTime(item.endTime)}
+                🕒 {formatToClock(item.startDate)} -{" "}
+                {formatToClock(item.endDate)}
               </Text>
               <TouchableOpacity
                 className="bg-white rounded-full py-0.5 px-2"
@@ -69,9 +95,7 @@ const EventItem = ({ item }: { item: EventCardItemType }) => {
                   }
                 }}
               >
-                <Text className="text-purple-500 font-bold">
-                  {item.isUserParticipant ? "Katıldınız" : "Katıl"}
-                </Text>
+                <Text className="text-purple-500 font-bold">{"Detay"}</Text>
               </TouchableOpacity>
             </View>
           </View>

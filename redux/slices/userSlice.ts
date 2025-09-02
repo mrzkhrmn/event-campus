@@ -1,9 +1,10 @@
+import { User } from "@/types/UserTypes";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userInfo: null,
-  token: null,
-  rememberMe: true,
+  userInfo: null as User | null,
+  token: null as string | null,
+  rememberMe: true as boolean,
 };
 
 const userSlice = createSlice({
@@ -15,9 +16,7 @@ const userSlice = createSlice({
       state.token = action.payload.token;
     },
     logout: (state) => {
-      if (!state.rememberMe) {
-        state.userInfo = null;
-      }
+      state.userInfo = null;
       state.token = null;
     },
     setRememberMe: (state, action) => {

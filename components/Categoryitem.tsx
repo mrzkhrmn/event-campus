@@ -5,14 +5,17 @@ import { CategoryItemType } from "@/types/CategoryTypes";
 const Categoryitem = ({
   item,
   handlePressCategory,
+  selectedCategoryId,
 }: {
   item: CategoryItemType;
   handlePressCategory: () => void;
+  selectedCategoryId: number;
 }) => {
+  const isSelected = item.id === selectedCategoryId;
   return (
     <Pressable
-      className={`rounded-lg p-2 border ${
-        item.isSelected
+      className={`rounded-lg py-2 border w-32 items-center justify-center ${
+        isSelected
           ? "bg-purple-500 border-purple-500"
           : "bg-white border-purple-300"
       }`}
@@ -20,7 +23,7 @@ const Categoryitem = ({
     >
       <Text
         className={`font-medium ${
-          item.isSelected ? "text-white" : "text-purple-500"
+          isSelected ? "text-white" : "text-purple-500"
         }`}
       >
         {item.icon}

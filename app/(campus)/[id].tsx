@@ -6,39 +6,34 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  FlatList,
+  Dimensions,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Linking from "expo-linking";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, router } from "expo-router";
-import { formatToDayMonthYear } from "@/utils/formatDate";
+import { formatToClock, formatToDayMonthYear } from "@/utils/formatDate";
 import {
-  useGetEventByIdQuery,
+  useGetEventDetailQuery,
   useJoinEventMutation,
   useLeaveEventMutation,
 } from "@/redux/api/event/eventApi";
+import { useWindowDimensions } from "react-native";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { setIsLoading } from "@/redux/slices/globalSlice";
-import { formatTime } from "@/utils/formatTime";
 const EventDetail = () => {
+  const { width, height } = useWindowDimensions();
   const { userInfo } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   const { id } = useLocalSearchParams();
-  const [showFullDescription, setShowFullDescription] = useState(false);
-
+  const [activeIndex, setActiveIndex] = useState(0);
   const eventId = Array.isArray(id) ? id[0] : id;
 
-  const { data: eventData, isLoading } = useGetEventByIdQuery(eventId, {
+  const { data: eventData, isLoading } = useGetEventDetailQuery(eventId, {
     refetchOnMountOrArgChange: true,
   });
-
-  const eventOwner = `${eventData?.data.createdByUser.name} ${eventData?.data.createdByUser.surname}`;
-
-  const truncatedDescription = eventData?.data.description
-    .split(" ")
-    .slice(0, 20)
-    .join(" ");
 
   const openInGoogleMaps = () => {
     const url = `https://www.google.com/maps/search/?api=1&query=${eventData?.data.latitude},${eventData?.data.longitude}`;
@@ -50,7 +45,12 @@ const EventDetail = () => {
   const handleJoinEvent = async () => {
     dispatch(setIsLoading(true));
     try {
-      const response = await joinEvent(eventId).unwrap();
+      const response = await joinEvent({
+        eventId: eventId,
+        studentId: userInfo?.id,
+      }).unwrap();
+
+      console.log("etkinlik katilim response", response);
       Alert.alert("Başarılı", response.message);
     } catch (error: any) {
       console.log(error);
@@ -63,7 +63,10 @@ const EventDetail = () => {
   const handleLeaveEvent = async () => {
     dispatch(setIsLoading(true));
     try {
-      const response = await leaveEvent(eventId).unwrap();
+      const response = await leaveEvent({
+        eventId: eventId,
+        studentId: userInfo?.id,
+      }).unwrap();
       Alert.alert("Başarılı", response.message);
     } catch (error: any) {
       console.log(error);
@@ -73,15 +76,22 @@ const EventDetail = () => {
     }
   };
 
+  const viewabilityConfig = { viewAreaCoveragePercentThreshold: 50 };
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setActiveIndex(viewableItems[0].index);
+    }
+  }).current;
+
   useEffect(() => {
     dispatch(setIsLoading(isLoading));
   }, [isLoading]);
 
-  const isUserParticipant = eventData?.data?.participants.find(
-    (user: any) => user.user.id == userInfo?.id
+  const isUserParticipant = eventData?.data?.participants.some(
+    (participant: any) => participant.studentId == userInfo?.id
   );
 
-  console.log(eventData?.data.participants);
   return (
     <View className="flex-1 bg-white px-4">
       <ScrollView
@@ -97,18 +107,52 @@ const EventDetail = () => {
           </Pressable>
           <Text className="text-2xl font-medium">Etkinlik Detay</Text>
         </View>
-        <View className="mt-4">
-          <Image
-            source={{
-              uri: "https://picsum.photos/200/300",
-            }}
-            resizeMode="cover"
-            className="w-full h-[20rem] rounded-lg"
-          />
+        <View className="mt-4 flex-1 rounded-lg overflow-hidden relative">
+          <View>
+            <FlatList
+              data={eventData?.data.eventImages}
+              horizontal
+              pagingEnabled
+              bounces={false}
+              snapToInterval={width}
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(_, index) => index.toString()}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
+              renderItem={({ item }) => (
+                <Image
+                  source={{ uri: item }}
+                  resizeMode="cover"
+                  style={{ width: width, height: height * 0.3 }}
+                />
+              )}
+            />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                marginTop: 8,
+              }}
+            >
+              {eventData?.data.eventImages.map((_: string, index: number) => (
+                <View
+                  key={index}
+                  style={{
+                    width: activeIndex === index ? 12 : 8,
+                    height: activeIndex === index ? 12 : 8,
+                    borderRadius: 6,
+                    backgroundColor: activeIndex === index ? "#333" : "#ccc",
+                    marginHorizontal: 4,
+                  }}
+                />
+              ))}
+            </View>
+          </View>
           <View className="border-b py-4 gap-1">
             <View className="flex-row items-center gap-2">
               <Text className="text-xl font-medium">Etkinlik Adı:</Text>
-              <Text className="text-xl font-medium">
+              <Text className="text-xl font-medium ">
                 {eventData?.data.name}
               </Text>
             </View>
@@ -123,20 +167,23 @@ const EventDetail = () => {
                 Başlangıç-Bitiş Saati:
               </Text>
               <Text className="text-xl font-medium">
-                {formatTime(eventData?.data?.startTime)} -{" "}
-                {formatTime(eventData?.data?.endTime)}
+                {formatToClock(eventData?.data?.startDate)} -{" "}
+                {formatToClock(eventData?.data?.endDate)}
               </Text>
             </View>
             <View className="flex-row items-center gap-2">
               <Text className="text-xl font-medium">Katılımcı Sayısı:</Text>
               <Text className="text-xl font-medium">
-                {eventData?.data.currentParticipantCount}/
+                {eventData?.data.currentParticipants}/
                 {eventData?.data.maxParticipants}
               </Text>
             </View>
             <View className="flex-row items-center gap-2">
               <Text className="text-xl font-medium">Düzenleyen:</Text>
-              <Text className="text-xl font-medium">{eventOwner}</Text>
+              <Text className="text-xl font-medium">
+                {eventData?.data.eventOwner.name}{" "}
+                {eventData?.data.eventOwner.surname}
+              </Text>
             </View>
             {eventData?.data.isFree ? (
               <View className="flex-row items-center gap-2">
@@ -146,7 +193,7 @@ const EventDetail = () => {
               <View className="flex-row items-center gap-2">
                 <Text className="text-xl font-medium">Ücret:</Text>
                 <Text className="text-xl font-medium">
-                  {eventData?.data.price} TL
+                  {eventData?.data.eventPrice || "Ücret"} TL
                 </Text>
               </View>
             )}
@@ -157,9 +204,7 @@ const EventDetail = () => {
               {eventData?.data?.participants.length > 0 ? (
                 eventData?.data?.participants.map(
                   (participant: any, index: number) => (
-                    <Text key={index}>
-                      {participant.user.name} {participant.user.surname}
-                    </Text>
+                    <Text key={index}>{participant.studentName}</Text>
                   )
                 )
               ) : (
@@ -171,38 +216,13 @@ const EventDetail = () => {
             <Text className="text-xl font-medium">Etkinlik Açıklaması:</Text>
             <View>
               <Text className="text-xl font-medium">
-                {showFullDescription ? (
-                  <>
-                    {eventData?.data.description}
-                    <Text
-                      className="text-purple-500 font-medium"
-                      onPress={() => setShowFullDescription(false)}
-                    >
-                      {" "}
-                      Daha az gör
-                    </Text>
-                  </>
-                ) : (
-                  <>
-                    {truncatedDescription}...
-                    <Text
-                      className="text-purple-500 font-medium"
-                      onPress={() => setShowFullDescription(true)}
-                    >
-                      {" "}
-                      devamını gör
-                    </Text>
-                  </>
-                )}
+                {eventData?.data.description}
               </Text>
             </View>
           </View>
           <Text className="text-xl font-medium mt-4">Harita Konumu:</Text>
-          <Text className="text-lg font-medium mt-2">
-            Tiklayip haritalarda görebilirsiniz.
-          </Text>
-          <Pressable onPress={openInGoogleMaps} className="mt-2">
-            {eventData?.data?.latitude && eventData?.data?.longitude ? (
+          <View className="mt-2">
+            {eventData?.data?.mapLatitude && eventData?.data?.mapLongitude ? (
               <MapView
                 style={{
                   width: "100%",
@@ -239,16 +259,25 @@ const EventDetail = () => {
                 <Text>Harita yükleniyor...</Text>
               </View>
             )}
+          </View>
+          <Pressable
+            onPress={openInGoogleMaps}
+            className="bg-green-600 py-2 px-4 rounded-full mt-4"
+          >
+            <Text className="text-white font-bold text-center text-lg">
+              Konum tarifi al
+            </Text>
           </Pressable>
           <View className="mt-4 ">
             <Text className="text-xl font-medium">Adres Detayı:</Text>
             <Text className="text-lg font-medium">
-              {eventData?.data.address}
+              {eventData?.data.openAddress}
             </Text>
           </View>
+
           {isUserParticipant ? (
             <TouchableOpacity
-              className="bg-red-500 py-2 px-4 rounded-full mt-4"
+              className="bg-purple-500 py-2 px-4 rounded-full mt-4"
               onPress={handleLeaveEvent}
             >
               <Text className="text-xl font-bold text-center text-white">

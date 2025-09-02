@@ -1,31 +1,49 @@
-import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import { useAppSelector } from "@/hooks/hooks";
 import { useGetStudentByIdQuery } from "@/redux/api/student/studentApi";
-import { logout } from "@/redux/slices/userSlice";
 import { formatToClock, formatToDayMonthYear } from "@/utils/formatDate";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   Text,
-  Pressable,
   View,
   FlatList,
   Image,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-const Profile = () => {
-  const { userInfo } = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
-  const handleLogout = () => {
-    dispatch(logout());
-    router.replace("/(auth)/login");
-  };
 
-  const { data: studentData } = useGetStudentByIdQuery(userInfo?.id, {
+const StudentProfile = () => {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { userInfo } = useAppSelector((state) => state.user);
+
+  const { data: studentData, isLoading } = useGetStudentByIdQuery(id, {
     refetchOnMountOrArgChange: true,
+    skip: !id,
   });
 
+  // Eğer kendi profilimizse profile sayfasına yönlendir
+  if (userInfo?.id === id) {
+    router.replace("/(campus)/profile");
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-lg text-gray-500">Yükleniyor...</Text>
+      </View>
+    );
+  }
+
+  if (!studentData?.data) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="text-lg text-red-500">Kullanıcı bulunamadı</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView className="flex-1   bg-white ">
+    <ScrollView className="flex-1 bg-white">
       <View className="items-center mt-4">
         <Image
           source={{
@@ -46,16 +64,17 @@ const Profile = () => {
           {studentData?.data?.email}
         </Text>
       </View>
+
       <View className="flex-row items-center justify-center my-4">
         <View className="border-r border-purple-400 flex-1 items-center justify-center">
           <Text className="text-2xl font-bold">
-            {studentData?.data?.participatedEventsCount}
+            {studentData?.data?.participatedEventsCount || 0}
           </Text>
           <Text className="text-md">Etkinliğe katıldı</Text>
         </View>
-        <View className="border-r border-purple-400  flex-1 items-center justify-center">
+        <View className="border-r border-purple-400 flex-1 items-center justify-center">
           <Text className="text-2xl font-bold">
-            {studentData?.data?.organizedEventsCount}
+            {studentData?.data?.organizedEventsCount || 0}
           </Text>
           <Text className="text-md">Etkinlik oluşturdu</Text>
         </View>
@@ -64,16 +83,22 @@ const Profile = () => {
           <Text className="text-md">Takipçi</Text>
         </View>
       </View>
+
       {studentData?.data?.organizedEvents.length > 0 && (
         <View className="mt-4 px-4">
           <Text className="text-2xl text-gray-700 font-bold">
             Düzenlenen Etkinlikler
-          </Text>{" "}
+          </Text>
           <FlatList
-            data={studentData?.data?.organizedEvents}
+            data={studentData?.data?.organizedEvents || []}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 10 }}
+            ListEmptyComponent={
+              <Text className="text-gray-500 text-center py-4">
+                Henüz etkinlik düzenlenmemiş
+              </Text>
+            }
             renderItem={({ item }) => (
               <View className="border border-gray-300 rounded-xl overflow-hidden w-[250px]">
                 <Image
@@ -83,30 +108,26 @@ const Profile = () => {
                   className="w-full h-24 z-10"
                   resizeMode="cover"
                 />
-                <View className="bg-purple-500">
-                  <View className="flex-col  p-3">
-                    <View className="flex-row gap-1">
-                      <Text className="text-white font-bold">
-                        Etkinlik Adı:
-                      </Text>
-                      <Text
-                        className="text-white font-medium whitespace-nowrap overflow-hidden text-ellipsis"
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {item.name}
-                      </Text>
-                    </View>
+                <View className="bg-purple-500 p-3">
+                  <View className="flex-row gap-1 mb-2">
+                    <Text className="text-white font-bold">Etkinlik Adı:</Text>
+                    <Text
+                      className="text-white font-medium flex-1"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.name}
+                    </Text>
                   </View>
-                  <Text className="text-white font-bold">
+                  <Text className="text-white font-bold mb-1">
                     📅 {formatToDayMonthYear(item.startDate)}
                   </Text>
-                  <Text className="text-white font-bold">
+                  <Text className="text-white font-bold mb-2">
                     🕒 {formatToClock(item.startDate)} -{" "}
                     {formatToClock(item.endDate)}
                   </Text>
                   <TouchableOpacity
-                    className="bg-white rounded-full py-0.5 px-2"
+                    className="bg-white rounded-full py-1 px-3 self-start"
                     onPress={() => {
                       if (item?.id) {
                         router.push(`/${item.id.toString()}`);
@@ -121,16 +142,22 @@ const Profile = () => {
           />
         </View>
       )}
+
       {studentData?.data?.participatedEvents.length > 0 && (
-        <View className="mt-4 px-4">
+        <View className="mt-4 px-4 mb-8">
           <Text className="text-2xl text-gray-700 font-bold">
-            Katildiğim Etkinlikler
+            Katıldığı Etkinlikler
           </Text>
           <FlatList
-            data={studentData?.data?.participatedEvents}
+            data={studentData?.data?.participatedEvents || []}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ gap: 10 }}
+            ListEmptyComponent={
+              <Text className="text-gray-500 text-center py-4">
+                Henüz etkinliğe katılmamış
+              </Text>
+            }
             renderItem={({ item }) => (
               <View className="border border-gray-300 rounded-xl overflow-hidden w-[250px]">
                 <Image
@@ -140,30 +167,26 @@ const Profile = () => {
                   className="w-full h-24 z-10"
                   resizeMode="cover"
                 />
-                <View className="bg-purple-500">
-                  <View className="flex-col  p-3">
-                    <View className="flex-row gap-1">
-                      <Text className="text-white font-bold">
-                        Etkinlik Adı:
-                      </Text>
-                      <Text
-                        className="text-white font-medium whitespace-nowrap overflow-hidden text-ellipsis"
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {item.name}
-                      </Text>
-                    </View>
+                <View className="bg-purple-500 p-3">
+                  <View className="flex-row gap-1 mb-2">
+                    <Text className="text-white font-bold">Etkinlik Adı:</Text>
+                    <Text
+                      className="text-white font-medium flex-1"
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.name}
+                    </Text>
                   </View>
-                  <Text className="text-white font-bold">
+                  <Text className="text-white font-bold mb-1">
                     📅 {formatToDayMonthYear(item.startDate)}
                   </Text>
-                  <Text className="text-white font-bold">
+                  <Text className="text-white font-bold mb-2">
                     🕒 {formatToClock(item.startDate)} -{" "}
                     {formatToClock(item.endDate)}
                   </Text>
                   <TouchableOpacity
-                    className="bg-white rounded-full py-0.5 px-2"
+                    className="bg-white rounded-full py-1 px-3 self-start"
                     onPress={() => {
                       if (item?.id) {
                         router.push(`/${item.id.toString()}`);
@@ -178,32 +201,8 @@ const Profile = () => {
           />
         </View>
       )}
-
-      {/* Profil Butonları */}
-      <View className="px-4 mt-6 mb-8 gap-4">
-        <TouchableOpacity
-          className="bg-purple-500 rounded-xl py-4 px-6 mx-4"
-          onPress={() => {
-            // TODO: Profil güncelleme sayfasına yönlendirme eklenecek
-            console.log("Bilgileri güncelle butonuna tıklandı");
-          }}
-        >
-          <Text className="text-white text-center text-lg font-bold">
-            📝 Bilgileri Güncelle
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="bg-red-500 rounded-xl py-4 px-6 mx-4"
-          onPress={handleLogout}
-        >
-          <Text className="text-white text-center text-lg font-bold">
-            🚪 Çıkış Yap
-          </Text>
-        </TouchableOpacity>
-      </View>
     </ScrollView>
   );
 };
 
-export default Profile;
+export default StudentProfile;
